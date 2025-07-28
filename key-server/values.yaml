@@ -1,0 +1,27 @@
+replicaCount: 2
+image:
+  repository: myregistry/key-server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+server:
+  port: 1123
+  maxSize: 1024
+  metricsPort: 8000
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+
+service:
+  type: ClusterIP
+  port: 1123
+  metricsPort: 8000
+
+serviceMonitor:
+  enabled: true
+  interval: 15s
