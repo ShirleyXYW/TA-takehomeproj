@@ -3,11 +3,12 @@
 A lightweight HTTP service that generates cryptographically secure random keys on demand, with built-in Prometheus metrics for monitoring and Kubernetes support for production deployments.
 
 🚀 Quick Start
+```
 Requirements
 Python 3.7+
 
 pip package manager
-
+```
 Installation
 bash
 git clone https://github.com/your-repo/key-service.git  
