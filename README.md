@@ -1,4 +1,3 @@
-# TA-takehomeproj
 Key Generation Service
 🔑 Key Generation Service
 A lightweight HTTP service that generates cryptographically secure random keys on demand, with built-in Prometheus metrics for monitoring and Kubernetes support for production deployments.
