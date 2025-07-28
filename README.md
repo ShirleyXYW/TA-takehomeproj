@@ -99,18 +99,4 @@ Horizontal pod autoscaling
 ```
 🚨 Monitoring & Alerts
 ### Recommended Alerts
-```
-yaml
-- alert: HighErrorRate  
-  expr: sum(rate(http_responses_total{status_code=~"5.."}[5m])) / sum(rate(http_responses_total[5m])) > 0.05  
-  labels:  
-    severity: critical  
-  annotations:  
-    summary: "High error rate ({{ $value }})"  
-
-- alert: ServiceDown  
-  expr: up{job="key-service"} == 0  
-  for: 2m  
-  labels:  
-    severity: critical
-```
+Ideally we would want to record the positive metrics(uptime, availability, response time, successful rate, 200 code rate..) and negative metrics(latency, error rate, non-200 code rate, downtime..) as well as some other metrics(Disk usage, CPU usage, memory usage, cache(if any) hit ratio..).
