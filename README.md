@@ -1,95 +1,164 @@
 # TA-takehomeproj
 Key Generation Service
-# Key Generation Service
+🔑 Key Generation Service
+A lightweight HTTP service that generates cryptographically secure random keys on demand, with built-in Prometheus metrics for monitoring and Kubernetes support for production deployments.
 
-A lightweight HTTP service that generates cryptographically secure random keys of specified lengths, with built-in Prometheus metrics for monitoring.
+🚀 Quick Start
+Requirements
+Python 3.7+
 
-## Features
+pip package manager
 
-- Generates random byte sequences on demand
-- Configurable maximum key size
-- Prometheus metrics integration
-- Health checks for container orchestration
-- Helm chart for Kubernetes deployment
-
-## Quick Start
-
-### Prerequisites
-- Python 3.7+
-- pip package manager
-
-### Installation
-```bash
-git clone https://github.com/your-repo/key-service.git
-cd key-service
-Running the Service
+Installation
 bash
-python key_server.py --srv-port 8080 --max-size 2048
-Test the Service
+git clone https://github.com/your-repo/key-service.git  
+cd key-service  
+pip install -r requirements.txt  
+Start Service
 bash
-curl http://localhost:8080/key/32 | hexdump -C
-curl http://localhost:8080/health
-API Endpoints
-Endpoint	Method	Description
-/key/<length>	GET	Generate random bytes of specified length
-/health	GET	Health check endpoint
-/metrics	GET	Prometheus metrics
-Configuration Options
-Parameter	Default	Description
---srv-port	1123	HTTP server port
---max-size	1024	Maximum allowed key size
---metrics-port	8000	Prometheus metrics port
---host	0.0.0.0	Network interface to bind to
-Prometheus Metrics
-The service exposes these metrics at :8000/metrics:
+python key_server.py --srv-port 8080 --max-size 2048  
+Test Service
+bash
+# Generate 32-byte key  
+curl http://localhost:8080/key/32 | hexdump -C  
 
-key_length_bytes: Histogram of requested key lengths
+# Check health  
+curl http://localhost:8080/health  
+# Output: OK  
 
-http_responses_total: Counter of HTTP responses by status code
+# Access metrics  
+curl http://localhost:8000/metrics  
+🌐 API Endpoints
+Endpoint	Description
+GET /key/<length>	Generate random bytes (hex encoded)
+GET /health	Service health check
+GET /metrics	Prometheus metrics endpoint
+⚙️ Configuration
+Configure using command-line arguments:
 
-request_latency_seconds: Request processing latency
+bash
+python key_server.py \  
+  --host 0.0.0.0 \         # Bind address (default)  
+  --srv-port 1123 \         # HTTP port  
+  --max-size 1024 \         # Max key size in bytes  
+  --metrics-port 8000       # Prometheus port  
+📊 Prometheus Metrics
+Access metrics at http://localhost:8000/metrics:
 
-Sample query:
+key_length_bytes
+Histogram of requested key lengths (20 linear buckets)
 
+http_responses_total
+Counter of HTTP responses by status code
+
+request_latency_seconds
+Request processing latency distribution
+
+Sample Queries
 promql
-# Average key size over 5m
-rate(key_length_bytes_sum[5m]) / rate(key_length_bytes_count[5m])
-Docker Deployment
-bash
-docker build -t key-service .
-docker run -p 1123:1123 -p 8000:8000 key-service
-Kubernetes Deployment
-Install Helm: https://helm.sh/docs/intro/install/
+# Average key size (5m window)  
+rate(key_length_bytes_sum[5m]) / rate(key_length_bytes_count[5m])  
 
-Deploy the chart:
+# Error rate  
+sum(rate(http_responses_total{status_code=~"5.."}[5m]))  
+/ sum(rate(http_responses_total[5m]))  
+🐳 Docker Deployment
+bash
+# Build image  
+docker build -t key-service .  
+
+# Run container  
+docker run -d \  
+  -p 1123:1123 \  
+  -p 8000:8000 \  
+  key-service \  
+  --max-size 2048  
+☸️ Kubernetes Deployment
+1. Install Helm
+https://helm.sh/docs/intro/install/
+
+2. Deploy Chart
+bash
+helm install key-service ./helm-chart \  
+  --set server.port=1123 \  
+  --set server.maxSize=2048  
+Helm Features
+Configurable resource limits
+
+Liveness/readiness probes
+
+ServiceMonitor for Prometheus
+
+Horizontal pod autoscaling
+
+🧪 Testing
+Run unit tests:
 
 bash
-helm install key-service ./helm-chart \
-  --set server.port=1123 \
-  --set server.maxSize=2048
-Testing
-Unit Tests
-bash
-python -m unittest discover
+python -m unittest discover  
 Test Cases
-Valid key generation requests
-
-Oversized key requests
-
-Invalid length parameters
-
-Health check validation
-
-Metrics endpoint verification
-
-Monitoring and Alerting
-Recommended Prometheus alerts:
-
+Test Type	Description
+Valid requests	Generate keys within size limits
+Size violations	Reject keys larger than max-size
+Invalid parameters	Handle non-integer length values
+Health checks	Verify /health endpoint
+Metrics endpoint	Validate Prometheus output format
+🚨 Monitoring & Alerts
+Recommended Alerts
 yaml
-- alert: HighErrorRate
-  expr: sum(rate(http_responses_total{status_code=~"5.."}[5m])) / sum(rate(http_responses_total[5m])) > 0.05
-  for: 5m
+- alert: HighErrorRate  
+  expr: sum(rate(http_responses_total{status_code=~"5.."}[5m])) / sum(rate(http_responses_total[5m])) > 0.05  
+  labels:  
+    severity: critical  
+  annotations:  
+    summary: "High error rate ({{ $value }})"  
 
-- alert: ServiceDown
-  expr: up{job="key-service"} == 0
-  for: 2m
+- alert: ServiceDown  
+  expr: up{job="key-service"} == 0  
+  for: 2m  
+  labels:  
+    severity: critical  
+Monitoring Dashboard
+https://example.com/dashboard-screenshot.png
+(Sample monitoring dashboard showing request rates, latency, and error percentages)
+
+🤝 Contributing
+Fork the repository
+
+Create feature branch (git checkout -b feature/improvement)
+
+Commit changes (git commit -am 'Add new feature')
+
+Push to branch (git push origin feature/improvement)
+
+Open pull request
+
+📜 License
+MIT License - See LICENSE for full text
+
+text
+Copyright 2023 Key Service Contributors  
+
+Permission is hereby granted...  
+Note: Production deployments should always:
+
+Use HTTPS with valid certificates
+
+Rotate API keys regularly
+
+Set resource limits in Kubernetes
+
+Enable Prometheus scraping
+
+Configure alert notifications
+
+Diagram
+Code
+graph LR
+    A[Client] -->|HTTP GET /key/32| B(Key Server)
+    B -->|Generate| C[Random Bytes]
+    C -->|Return| A
+    B -->|Record| D[Metrics]
+    D -->|Scrape| E[Prometheus]
+    E -->|Alert| F[Alertmanager]
+    F -->|Notify| G[Slack/Email]
